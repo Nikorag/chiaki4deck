@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "compile": "cmake-js --out=build -d ../ --CDCHIAKI_ENABLE_STEAMDECK_NATIVE=OFF --CDCHIAKI_ENABLE_CLI=OFF --CDCHIAKI_ENABLE_GUI=OFF compile",
+    "compile": "tsc && grunt && cmake-js --out=build -d ../ --CDCHIAKI_ENABLE_STEAMDECK_NATIVE=OFF --CDCHIAKI_ENABLE_CLI=OFF --CDCHIAKI_ENABLE_GUI=OFF compile",
     "start": "ts-node server/index.ts",
     "build": "tsc && grunt && grunt watch-changes"
   },

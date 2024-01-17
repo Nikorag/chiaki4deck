@@ -7,7 +7,7 @@ function AppCtrl($scope, socket, $modal) {
         $scope.hosts = data.map((host) => {
             return {
                 ...host,
-                status : host.status = 1 ? "Standby" : "Ready"
+                status : mapStatus(host.status)
             }
         });
         console.log($scope.hosts);
@@ -53,6 +53,12 @@ function RegisterCtrl($scope, $modalInstance, host) {
     $scope.cancel = function () {
         $modalInstance.dismiss('cancel');
     };
+}
+
+function mapStatus(status){
+    if (status === 620) { return "Standby"; }
+    if (status === 200) { return "Ready"; }
+    return "UNKNOWN"
 }
 
 app.controller("AppCtrl", ['$scope', 'socket', '$modal', AppCtrl]);

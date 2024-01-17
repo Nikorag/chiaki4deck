@@ -42,6 +42,7 @@ export function initDiscovery(protocol_version: string, callbackPort : number, c
 }
 
 function attemptBind(discovery: Discovery, port: number, protocol_version: string, callbackPort : number, callback: DiscoveryCallback) {  
+    console.log("Attempting to bind to port "+port);
     discovery.socket?.bind(port, undefined, () => {
         discovery.socket?.setBroadcast(true);
         let discoverPacket: Buffer | null = formatPacket({
@@ -75,7 +76,7 @@ function attemptBind(discovery: Discovery, port: number, protocol_version: strin
 
 export const parseSonyConsoleString = (input: string, remoteInfo : RemoteInfo): SonyConsole | null => {
     const lines = input.split('\n');
-    const statusMatch = lines[0].match(/(\d+)\s(.*)/);
+    const statusMatch = lines[0].match(/HTTP\/1.1 (\d+)\s(.*)/);
 
     if (!statusMatch) {
         return null;

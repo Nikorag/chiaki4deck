@@ -1,7 +1,7 @@
 export enum ConsoleStatus {
-    STANDBY,
-    READY,
-    UNKNOWN
+    STANDBY = 620,
+    READY = 200,
+    UNKNOWN = 0
 }
 
 export enum ConsoleType {
