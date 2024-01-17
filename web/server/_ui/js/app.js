@@ -1,0 +1,1 @@
+app = angular.module("chiakiWeb", ["ngAnimate", 'ui.bootstrap']);

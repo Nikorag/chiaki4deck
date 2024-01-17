@@ -26,9 +26,11 @@ include_directories(${CMAKE_JS_INC})
 file(GLOB SOURCE_FILES "include/*.h" "src/*.cpp")
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${CMAKE_JS_SRC})
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
+find_package(Qt6 REQUIRED COMPONENTS Core Concurrent)
 target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB})
 target_link_libraries(${PROJECT_NAME} chiaki-lib)
-target_include_directories(${PROJECT_NAME} PRIVATE "/Users/jamie/projects/Personal/web-chiaki/node_modules/node-addon-api")
+target_link_libraries(${PROJECT_NAME} Qt::Core Qt::Concurrent)
+target_include_directories(${PROJECT_NAME} PRIVATE "node_modules/node-addon-api")
 target_include_directories(${PROJECT_NAME} PRIVATE "include")
 
 # Define NAPI_VERSION

@@ -270,7 +270,7 @@ CHIAKI_EXPORT ChiakiErrorCode chiaki_thread_timedjoin(ChiakiThread *thread, void
 	//you should NEVER use an arbitrary wait like this, but as there is no official mac distribution and this is only for
 	//local development we're going to ignore it.
 	int r = pthread_mach_thread_np(thread->thread);
-	sleep(2);
+	sleep(5);
 #else
 	int r = pthread_clockjoin_np(thread->thread, retval, CLOCK_MONOTONIC, &timeout);
 #endif

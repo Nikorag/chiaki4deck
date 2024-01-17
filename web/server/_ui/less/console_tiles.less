@@ -1,0 +1,35 @@
+.console_container {
+    font-family:"Calibri", sans-serif;
+    
+    .console_tile {
+        display: inline-block;
+        text-align: center;
+        width: 206px;
+        height: 200px;
+        border: 1px solid black;
+        margin: 0 16px;
+
+        p {
+            margin: 0 0;
+            font-size: 14px;
+        }
+
+        svg {
+            width: 170px;
+            height: 46px;
+            margin: 16px 0;
+        }
+
+        &.Standby {
+            path[inkscape\:label="light_on"]{
+                opacity: 0;
+            }
+        }
+    
+        .console_image {
+            svg {
+                margin: 8px 0;
+            }
+        }
+    }
+}

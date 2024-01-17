@@ -35,3 +35,14 @@ chiaki.conf
 .cache/
 *.vscode
 site/
+
+#Web Chiaki
+web/node_modules
+web/build
+web/dist
+web/data
+web/public/js/app.js
+web/public/js/app.min.js
+web/public/js/app.min.js.map
+web/public/css/base.min.css
+web/public/css/base.css

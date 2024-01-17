@@ -1,0 +1,53 @@
+<div class="modal-header">
+    <h3 class="modal-title">Register Console</h3>
+</div>
+<div class="modal-body">
+    <div class="form-group">
+        <label for="InputAddress">Host address</label>
+        <input value="{{host.address}}" type="text" class="form-control" id="InputAddress"
+               aria-describedby="addressHelp" placeholder="Enter Host">
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="addressType" id="addressType_ps4_lt7" ng-value="'ps4_lt7'" ng-model="addressType">
+        <label class="form-check-label" for="addressType_ps4_lt7">
+            PS4 Firmware < 7.0
+        </label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="addressType" id="addressType_ps4_gt_7_lt_8" ng-value="'ps4_gt_7_lt_8'" ng-model="addressType">
+        <label class="form-check-label" for="addressType_ps4_gt_7_lt_8">
+            PS4 Firmware >= 7.0, < 8.0
+        </label>
+    </div>
+    <div class="form-check disabled">
+        <input class="form-check-input" type="radio" name="addressType" id="addressType_ps4_gt_8" ng-value="'ps4_gt_8'" ng-model="addressType">
+        <label class="form-check-label" for="addressType_ps4_gt_8">
+            PS4 Firmware >= 8.0
+        </label>
+    </div>
+    <div class="form-check disabled">
+        <input class="form-check-input" type="radio" name="addressType" id="addressType_ps5" ng-value="'ps5'" ng-model="addressType">
+        <label class="form-check-label" for="addressType_ps5">
+            PS5
+        </label>
+    </div>
+    <div class="form-group">
+        <label for="psnOnlineId">PSN Online-ID</label>
+        <input type="text" class="form-control" id="psnOnlineId"
+               aria-describedby="psnOnlineIdHelp" placeholder="Enter PSN Online-ID" ng-disabled="addressType == 'ps5'">
+    </div>
+    <div class="form-group">
+        <label for="psnAccountId">PSN Account-ID (base64)</label>
+        <input type="text" class="form-control" id="psnAccountId"
+               aria-describedby="psnAccountIdHelp" placeholder="Enter PSN Account-ID (base64)">
+    </div>
+    <div class="form-group">
+        <label for="pin">PIN</label>
+        <input type="number" class="form-control" id="pin"
+               aria-describedby="psnAccountIdHelp" placeholder="Enter PIN">
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" type="button" ng-click="ok()">Register</button>
+    <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+</div>
