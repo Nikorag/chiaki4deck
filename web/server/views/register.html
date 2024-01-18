@@ -4,7 +4,7 @@
 <div class="modal-body">
     <div class="form-group">
         <label for="InputAddress">Host address</label>
-        <input value="{{host.address}}" type="text" class="form-control" id="InputAddress"
+        <input ng-model="inputAddress" type="text" class="form-control" id="InputAddress"
                aria-describedby="addressHelp" placeholder="Enter Host">
     </div>
     <div class="form-check">
@@ -33,17 +33,17 @@
     </div>
     <div class="form-group">
         <label for="psnOnlineId">PSN Online-ID</label>
-        <input type="text" class="form-control" id="psnOnlineId"
+        <input type="text" class="form-control" id="psnOnlineId" ng-model="psnOnlineId"
                aria-describedby="psnOnlineIdHelp" placeholder="Enter PSN Online-ID" ng-disabled="addressType == 'ps5'">
     </div>
     <div class="form-group">
         <label for="psnAccountId">PSN Account-ID (base64)</label>
-        <input type="text" class="form-control" id="psnAccountId"
+        <input type="text" class="form-control" id="psnAccountId" ng-model="psnAccountId"
                aria-describedby="psnAccountIdHelp" placeholder="Enter PSN Account-ID (base64)">
     </div>
     <div class="form-group">
         <label for="pin">PIN</label>
-        <input type="number" class="form-control" id="pin"
+        <input type="number" class="form-control" id="pin" ng-model="pin"
                aria-describedby="psnAccountIdHelp" placeholder="Enter PIN">
     </div>
 </div>

@@ -1,18 +1,20 @@
 import {WebChiakiConstants} from "./constants/WebChiakiConstants";
 import {SonyConsole} from "./models/Core";
-import {DiscoveryCallback, initDiscovery} from "./service/DiscoveryService";
+import {DiscoveryCallback, DiscoveryStartCallback, initDiscovery} from "./service/DiscoveryService";
 import express from 'express';
+import bodyParser from 'body-parser';
 import http from 'http';
 import {Server, Socket} from 'socket.io';
 import {getRegisteredHosts, register} from "./service/RegistrationService";
 import {RegistrationAddressType, RegistrationForm} from "./models/Registration";
 
 const app = express();
+app.use(bodyParser.json());
 const server = http.createServer(app);
 const io = new Server(server);
 const port = 9944;
 
-const discoveredHosts : SonyConsole[] = [];
+let discoveredHosts : SonyConsole[] = [];
 const registeredHosts : SonyConsole[] = getRegisteredHosts();
 
 // Serve your static files (if any)
@@ -25,6 +27,11 @@ app.get('/', (req, res) => {
 app.get('/register', (req, res) => {
   res.sendFile(__dirname + '/views/register.html');
 });
+
+app.post('/register', (req, res) => {
+  let form : RegistrationForm = req.body;
+  register(form);
+})
 
 io.on('connection', (socket: Socket) => {
   console.log('A user connected');
@@ -77,5 +84,9 @@ const hostDiscoveredCallback: DiscoveryCallback = (sonyConsole : SonyConsole | n
     io.emit('discovered_hosts', combineHosts());
 };
 
-initDiscovery(WebChiakiConstants.CHIAKI_DISCOVERY_PROTOCOL_VERSION_PS4, WebChiakiConstants.CHIAKI_DISCOVERY_PORT_PS4, hostDiscoveredCallback);
-initDiscovery(WebChiakiConstants.CHIAKI_DISCOVERY_PROTOCOL_VERSION_PS5, WebChiakiConstants.CHIAKI_DISCOVERY_PORT_PS5, hostDiscoveredCallback);
+const discoveryStartingCallback : DiscoveryStartCallback = () => {
+  discoveredHosts = [];
+}
+
+initDiscovery(WebChiakiConstants.CHIAKI_DISCOVERY_PROTOCOL_VERSION_PS4, WebChiakiConstants.CHIAKI_DISCOVERY_PORT_PS4, hostDiscoveredCallback, discoveryStartingCallback);
+initDiscovery(WebChiakiConstants.CHIAKI_DISCOVERY_PROTOCOL_VERSION_PS5, WebChiakiConstants.CHIAKI_DISCOVERY_PORT_PS5, hostDiscoveredCallback, discoveryStartingCallback);

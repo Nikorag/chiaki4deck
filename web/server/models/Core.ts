@@ -20,4 +20,5 @@ export type SonyConsole = {
     systemVersion? : string;
     registered : Boolean;
     discovered : Boolean;
+    registKey? : string;
 }

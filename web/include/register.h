@@ -10,6 +10,7 @@ class Register : public Napi::ObjectWrap<Register> {
         Napi::Value CreatePayload(const Napi::CallbackInfo& info);
         Napi::Value CreateHeader(const Napi::CallbackInfo& info);
         Napi::Value Search(const Napi::CallbackInfo& info);
+        Napi::Value Connect(const Napi::CallbackInfo& info);
 
     private:
         static Napi::FunctionReference constructor;

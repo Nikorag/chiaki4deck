@@ -11,9 +11,24 @@ export function openDb(): Database {
     'hostName' varchar, \
     'hostRequestPort' integer, \
     'deviceDiscoveryProtocolVersion' varchar, \
+    'registKey' varchar, \
     'systemVersion' varchar);"
     db.exec(createRegisteredHostsTable);
     
     // Some initialization
     return db;
+}
+
+export function insert(tableName: string, data: any): void {
+    let db : Database = openDb();
+    const columns = Object.keys(data);
+    const values = Object.values(data);
+
+    const placeholders = columns.map(() => '?').join(', ');
+    const columnsList = columns.join(', ');
+
+    const insertStatement = `INSERT INTO ${tableName} (${columnsList}) VALUES (${placeholders})`;
+    db.exec(insertStatement);
+
+    db.close();
 }

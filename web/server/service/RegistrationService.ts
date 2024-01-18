@@ -1,12 +1,12 @@
-import {openDb} from "./DataService";
-import {SonyConsole} from "../models/Core";
+import {openDb, insert} from "./DataService";
+import {ConsoleStatus, SonyConsole} from "../models/Core";
 import {RegistrationAddressType, RegistrationForm} from "../models/Registration";
 import {createSocket, RemoteInfo} from 'dgram';
 import * as net from 'net';
 
 const chiaki = require("bindings")("../../build/Release/web-chiaki.node");
 
-export type RegistrationSearchCallback = (msg : Buffer, rinfo : RemoteInfo) => void;
+export type RegistrationSearchCallback = (address : string, port : number) => void;
 
 function printObjectPropertiesAndMethods(obj : any) {
     console.log("Object Properties:");
@@ -33,17 +33,26 @@ export function getRegisteredHosts(): SonyConsole[] {
         discovered: false,
     }));
 
+    db.close();
+
     return registeredHosts;
 }
 
-export async function register(form : RegistrationForm) : Promise<void> {
+export function register(form : RegistrationForm) : SonyConsole {
     let register = new chiaki.Register();
     let payload : Uint8Array = new Uint8Array(register.createPayload(form.addressType, form.psnOnlineId, form.psnAccountId, form.pin));
     let header : string = register.createHeader(form.addressType, payload.length);
-
-    search(form, (msg, rinfo) => {
-        registerRequest(form, payload, header, 8080);
-    });
+    let searchResponse = register.startSearch(form.addressType, form.inputAddress);
+    let registered_host = register.connect(form.addressType, searchResponse.address, form.psnOnlineId, form.psnAccountId, form.pin);
+    let response : SonyConsole = {
+        status: ConsoleStatus.UNKNOWN,
+        registered: true,
+        discovered: true,
+        hostName: registered_host.server_nickname,
+        registKey: registered_host.regist_key
+    }
+    insert("registered_hosts", response);
+    return response;
 }
 
 function search(form : RegistrationForm, callback : RegistrationSearchCallback){
@@ -52,9 +61,10 @@ function search(form : RegistrationForm, callback : RegistrationSearchCallback){
     
     let socket = createSocket("udp4");
     socket.bind(9295, undefined, () => {
-        socket.on('message', (msg, rinfo) => {
+        socket.on('message', (msg : Buffer, rinfo : RemoteInfo) => {
+            console.log("Register callback");
             //Playstation should respond to tell us which port
-            callback(msg, rinfo);
+            callback(rinfo.address, rinfo.port);
         });
 
         socket.send(src, 0, src.length, 9295, form.inputAddress, (err) => {
@@ -68,8 +78,8 @@ function search(form : RegistrationForm, callback : RegistrationSearchCallback){
     });
 }
 
-function registerRequest(form : RegistrationForm, payload : Uint8Array, header : string, port : number){
-    const client = net.createConnection({host : form.inputAddress, port : port}, () => {
+function registerRequest(form : RegistrationForm, address : string, payload : Uint8Array, header : string, port : number){
+    const client = net.createConnection({host : address, port : port}, () => {
 
         client.on('data', (data) => {
             console.log(`Received from server: ${data}`);

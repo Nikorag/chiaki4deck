@@ -77,6 +77,7 @@ typedef struct chiaki_regist_t
 CHIAKI_EXPORT ChiakiErrorCode chiaki_regist_start(ChiakiRegist *regist, ChiakiLog *log, const ChiakiRegistInfo *info, ChiakiRegistCb cb, void *cb_user);
 CHIAKI_EXPORT void chiaki_regist_fini(ChiakiRegist *regist);
 CHIAKI_EXPORT void chiaki_regist_stop(ChiakiRegist *regist);
+CHIAKI_EXPORT ChiakiErrorCode regist_recv_response(ChiakiRegist *regist, ChiakiRegisteredHost *host, chiaki_socket_t sock, ChiakiRPCrypt *rpcrypt);
 
 /**
  * @param psn_account_id must be exactly of size CHIAKI_PSN_ACCOUNT_ID_SIZE
