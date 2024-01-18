@@ -6,6 +6,7 @@ export enum RegistrationAddressType {
 }
 
 export type RegistrationForm = {
+    hostId : string,
     inputAddress : string,
     addressType : RegistrationAddressType,
     psnOnlineId? : string,

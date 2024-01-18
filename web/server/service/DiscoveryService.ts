@@ -6,17 +6,21 @@ import { createSocket, RemoteInfo, Socket } from 'dgram';
 export type DiscoveryCallback = (sonyConsole: SonyConsole | null) => void;
 export type DiscoveryStartCallback = () => void;
 
+class SocketError extends Error {
+    code?: string;
+}
+
 export function initDiscovery(protocol_version: string, callbackPort : number, callback: DiscoveryCallback, startingCallback : DiscoveryStartCallback): void {
-    let addr: LocalAddr = {
+    const addr: LocalAddr = {
         address: "0.0.0.0",
         family: "IPv4",
         port: WebChiakiConstants.CHIAKI_DISCOVERY_PORT_LOCAL_MIN
     }
 
-    let discovery: Discovery = { localAddr: addr };
+    const discovery: Discovery = { localAddr: addr };
     discovery.socket = createSocket("udp4");
 
-    discovery.socket?.on('error', (error : any) => {
+    discovery.socket?.on('error', (error : SocketError) => {
         if (error.code === 'EADDRINUSE') {
             // Increase the port and try again
             addr.port++;
@@ -46,13 +50,13 @@ function attemptBind(discovery: Discovery, port: number, protocol_version: strin
     console.log("Attempting to bind to port "+port);
     discovery.socket?.bind(port, undefined, () => {
         discovery.socket?.setBroadcast(true);
-        let discoverPacket: Buffer | null = formatPacket({
+        const discoverPacket: Buffer | null = formatPacket({
             cmd: DiscoverCommand.SEARCH,
             protocol_version: protocol_version
         });
 
         if (discoverPacket !== null) {
-            const packetUint8Array = Uint8Array.from(discoverPacket);
+            const packetUint8Array : Uint8Array = Uint8Array.from(discoverPacket);
             sendDiscoveryPacket(startingCallback, discovery.socket, packetUint8Array, callbackPort);
             setInterval(() => {sendDiscoveryPacket(startingCallback, discovery.socket, packetUint8Array, callbackPort);}, 3000);
         } else {
@@ -64,7 +68,7 @@ function attemptBind(discovery: Discovery, port: number, protocol_version: strin
         }
 
         // Listen for responses
-        discovery.socket?.on('message', (msg, rinfo) => {
+        discovery.socket?.on('message', (msg : Buffer, rinfo : RemoteInfo) => {
             callback(parseSonyConsoleString(msg.toString(), rinfo));
         });
     });
@@ -72,25 +76,23 @@ function attemptBind(discovery: Discovery, port: number, protocol_version: strin
 
 function sendDiscoveryPacket(startingCallback : DiscoveryStartCallback , socket : Socket | undefined, packet : Uint8Array, callbackPort : number){
     startingCallback();
-    socket?.send(packet, 0, packet.length, callbackPort, '255.255.255.255', (err) => {
+    socket?.send(packet, 0, packet.length, callbackPort, '255.255.255.255', (err : Error | null) => {
         if (err) {
             console.error('Error sending message:', err);
-        } else {
-            //console.log('Discover Message sent successfully');
         }
     });
 }
 
-export const parseSonyConsoleString = (input: string, remoteInfo : RemoteInfo): SonyConsole | null => {
-    const lines = input.split('\n');
-    const statusMatch = lines[0].match(/HTTP\/1.1 (\d+)\s(.*)/);
+function parseSonyConsoleString(input: string, remoteInfo : RemoteInfo) : SonyConsole | null {
+    const lines : string[] = input.split('\n');
+    const statusMatch : RegExpMatchArray | null = lines[0].match(/HTTP\/1.1 (\d+)\s(.*)/);
 
     if (!statusMatch) {
         return null;
     }
 
-    const [, statusCode, statusText] = statusMatch;
-    const consoleStatus = parseInt(statusCode, 10) as ConsoleStatus;
+    const [, statusCode] : string[] = statusMatch;
+    const consoleStatus : ConsoleStatus = parseInt(statusCode, 10) as ConsoleStatus;
 
     const consoleInfo: Partial<SonyConsole> = {
         hostId: lines[1].split(':')[1].trim(),
@@ -101,19 +103,23 @@ export const parseSonyConsoleString = (input: string, remoteInfo : RemoteInfo): 
         systemVersion: lines[6].split(':')[1].trim(),
     };
 
-    return {
-        address: remoteInfo.address,
-        status: consoleStatus,
-        hostId: consoleInfo.hostId,
-        hostType: consoleInfo.hostType,
-        hostName: consoleInfo.hostName,
-        hostRequestPort: consoleInfo.hostRequestPort,
-        deviceDiscoveryProtocolVersion: consoleInfo.deviceDiscoveryProtocolVersion,
-        systemVersion: consoleInfo.systemVersion,
-        registered: false,
-        discovered: true
-    };
-};
+    if (consoleInfo.hostId){
+        return {
+            address: remoteInfo.address,
+            status: consoleStatus,
+            hostId: consoleInfo.hostId,
+            hostType: consoleInfo.hostType,
+            hostName: consoleInfo.hostName,
+            hostRequestPort: consoleInfo.hostRequestPort,
+            deviceDiscoveryProtocolVersion: consoleInfo.deviceDiscoveryProtocolVersion,
+            systemVersion: consoleInfo.systemVersion,
+            registered: false,
+            discovered: true
+        };
+    } else {
+        return null;
+    }
+}
 
 function formatPacket(packet: DiscoverPacket): Buffer | null {
     if (!packet.protocol_version) {

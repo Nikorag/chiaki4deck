@@ -12,13 +12,13 @@ export enum ConsoleType {
 export type SonyConsole = {
     address? : string;
     status : ConsoleStatus;
-    hostId? : string;
+    hostId : string;
     hostType? : ConsoleType;
     hostName? : string;
     hostRequestPort? : number;
     deviceDiscoveryProtocolVersion? : string;
     systemVersion? : string;
-    registered : Boolean;
-    discovered : Boolean;
+    registered : boolean;
+    discovered : boolean;
     registKey? : string;
 }

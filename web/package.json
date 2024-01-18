@@ -12,6 +12,10 @@
   "license": "ISC",
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.8",
+    "@types/bindings": "^1.5.5",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "eslint": "^8.56.0",
     "grunt": "^1.6.1",
     "grunt-contrib-cssmin": "^5.0.0",
     "grunt-contrib-less": "^3.0.0",

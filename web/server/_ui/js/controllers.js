@@ -50,6 +50,7 @@ function RegisterCtrl($scope, $modalInstance, host) {
 
     $scope.ok = function () {
         let form = {
+            hostId : $scope.host.hostId,
             inputAddress : $scope.inputAddress,
             addressType : mapAddressType($scope.addressType),
             psnOnlineId : $scope.psnOnlineId ? $scope.psnOnlineId : "",

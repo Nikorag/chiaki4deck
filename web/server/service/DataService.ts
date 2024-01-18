@@ -1,7 +1,7 @@
-import DatabaseConstructor, {Database} from "better-sqlite3";
+import DatabaseConstructor, {Database, Statement} from "better-sqlite3";
 
 export function openDb(): Database {
-    let db: Database = new DatabaseConstructor('data/web-chiaki.db');
+    const db: Database = new DatabaseConstructor('data/web-chiaki.db');
     
     const createRegisteredHostsTable : string = "CREATE TABLE IF NOT EXISTS registered_hosts( \
     'address' varchar, \
@@ -19,16 +19,16 @@ export function openDb(): Database {
     return db;
 }
 
-export function insert(tableName: string, data: any): void {
-    let db : Database = openDb();
-    const columns = Object.keys(data);
-    const values = Object.values(data);
+export function insert(tableName: string, data: object): void {
+    const db : Database = openDb();
+    const columns : string[] = Object.keys(data);
 
-    const placeholders = columns.map(() => '?').join(', ');
-    const columnsList = columns.join(', ');
+    const placeholders : string = columns.map((c : string) => `?${c}`).join(', ');
+    const columnsList : string = columns.join(', ');
 
-    const insertStatement = `INSERT INTO ${tableName} (${columnsList}) VALUES (${placeholders})`;
-    db.exec(insertStatement);
+    const insertStatement : string = `INSERT INTO ${tableName} (${columnsList}) VALUES (${placeholders})`;
+    const insertCommand : Statement = db.prepare(insertStatement);
+    insertCommand.run(data);
 
     db.close();
 }

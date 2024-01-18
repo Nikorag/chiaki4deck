@@ -1,18 +1,19 @@
 import {WebChiakiConstants} from "./constants/WebChiakiConstants";
 import {SonyConsole} from "./models/Core";
 import {DiscoveryCallback, DiscoveryStartCallback, initDiscovery} from "./service/DiscoveryService";
-import express from 'express';
+import express, {Request, Response, Express} from 'express';
 import bodyParser from 'body-parser';
 import http from 'http';
 import {Server, Socket} from 'socket.io';
 import {getRegisteredHosts, register} from "./service/RegistrationService";
-import {RegistrationAddressType, RegistrationForm} from "./models/Registration";
+import {RegistrationForm} from "./models/Registration";
+import {API_RESPONSE} from "./models/Api";
 
-const app = express();
+const app : Express = express();
 app.use(bodyParser.json());
-const server = http.createServer(app);
-const io = new Server(server);
-const port = 9944;
+const server : http.Server = http.createServer(app);
+const io : Server = new Server(server);
+const port : number = 9944;
 
 let discoveredHosts : SonyConsole[] = [];
 const registeredHosts : SonyConsole[] = getRegisteredHosts();
@@ -20,17 +21,19 @@ const registeredHosts : SonyConsole[] = getRegisteredHosts();
 // Serve your static files (if any)
 app.use(express.static('public'));
 
-app.get('/', (req, res) => {
+app.get('/', (req : Request, res : Response) => {
   res.sendFile(__dirname + '/views/index.html');
 });
 
-app.get('/register', (req, res) => {
+app.get('/register', (req : Request, res : Response) => {
   res.sendFile(__dirname + '/views/register.html');
 });
 
-app.post('/register', (req, res) => {
-  let form : RegistrationForm = req.body;
+app.post('/register', (req : Request, res : Response) => {
+  const form : RegistrationForm = req.body;
   register(form);
+  const apiResponse : API_RESPONSE = { status : "OK" };
+  res.json(apiResponse)
 })
 
 io.on('connection', (socket: Socket) => {
@@ -38,14 +41,6 @@ io.on('connection', (socket: Socket) => {
 
   // Send a welcome message to the connected client
   socket.emit('discovered_hosts', combineHosts());
-
-//   // Listen for messages from the client
-//   socket.on('clientMessage', (message: string) => {
-//     console.log(`Received message from client: ${message}`);
-
-//     // Broadcast the received message to all connected clients
-//     io.emit('message', message);
-//   });
 
   // Handle disconnection
   socket.on('disconnect', () => {
@@ -58,7 +53,7 @@ server.listen(port, () => {
 });
 
 function combineHosts() : SonyConsole[] {
-  let combinedHosts = discoveredHosts;
+  const combinedHosts : SonyConsole[] = discoveredHosts;
   //Add discovered hosts and check if they're registered
   combinedHosts.forEach((discoveredHost : SonyConsole) => {
     const registeredHost : SonyConsole | undefined = registeredHosts.find((h : SonyConsole) => h.hostId == discoveredHost.hostId);
@@ -73,7 +68,8 @@ function combineHosts() : SonyConsole[] {
   });
   
   //Add registered hosts as undiscovered
-  combinedHosts.concat(registeredHosts.filter((h) => !combinedHosts.find((ch) => ch.hostId==h.hostId)));
+  combinedHosts.concat(registeredHosts.filter((h : SonyConsole) => !combinedHosts.find((ch : SonyConsole) => ch.hostId==h.hostId)));
+  combinedHosts.sort((a : SonyConsole, b : SonyConsole) => a.hostId > b.hostId ? 1 : -1);
   return combinedHosts;
 }
 
