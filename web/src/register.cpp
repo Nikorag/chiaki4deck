@@ -199,7 +199,7 @@ Napi::Value Register::Connect(const Napi::CallbackInfo& info) {
 
 	Napi::Object responseObject = Napi::Object::New(info.Env());
 	responseObject.Set("server_nickname", registered_host.server_nickname);
-	responseObject.Set("regist_key", registered_host.server_nickname);
+	responseObject.Set("regist_key", strFromCharArray(registered_host.rp_regist_key));
 
 	return responseObject;
 }
