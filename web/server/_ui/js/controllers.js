@@ -3,6 +3,10 @@
 /* Controllers */
 
 function AppCtrl($scope, socket, $modal, $http) {
+    $scope.toggleDiscovery = function() {
+        socket.emit("toggleDiscovery", {});
+    }
+
     socket.on('discovered_hosts', function (data) {
         $scope.hosts = data.map((host) => {
             return {
@@ -12,6 +16,14 @@ function AppCtrl($scope, socket, $modal, $http) {
         });
         console.log($scope.hosts);
     });
+
+    socket.on('discovery_enabled', function (enabled) {
+        $scope.discoveryEnabled = enabled;
+    });
+
+    $scope.discoveryDirection = function(){
+        return $scope.discoveryEnabled ? "OFF" : "ON";
+    }
 
     $scope.consoleImage = function(host){
         if (host.hostType == 0) {

@@ -6,8 +6,18 @@ import { createSocket, RemoteInfo, Socket } from 'dgram';
 export type DiscoveryCallback = (sonyConsole: SonyConsole | null) => void;
 export type DiscoveryStartCallback = () => void;
 
+let discoveryEnabled : boolean = true;
+
 class SocketError extends Error {
     code?: string;
+}
+
+export function toggleDiscoveryEnabled() : void {
+    discoveryEnabled = !discoveryEnabled;
+}
+
+export function getDiscoveryEnabled() : boolean {
+    return discoveryEnabled;
 }
 
 export function initDiscovery(protocol_version: string, callbackPort : number, callback: DiscoveryCallback, startingCallback : DiscoveryStartCallback): void {
@@ -76,11 +86,13 @@ function attemptBind(discovery: Discovery, port: number, protocol_version: strin
 
 function sendDiscoveryPacket(startingCallback : DiscoveryStartCallback , socket : Socket | undefined, packet : Uint8Array, callbackPort : number){
     startingCallback();
-    socket?.send(packet, 0, packet.length, callbackPort, '255.255.255.255', (err : Error | null) => {
-        if (err) {
-            console.error('Error sending message:', err);
-        }
-    });
+    if (discoveryEnabled){
+        socket?.send(packet, 0, packet.length, callbackPort, '255.255.255.255', (err : Error | null) => {
+            if (err) {
+                console.error('Error sending message:', err);
+            }
+        });
+    }
 }
 
 function parseSonyConsoleString(input: string, remoteInfo : RemoteInfo) : SonyConsole | null {

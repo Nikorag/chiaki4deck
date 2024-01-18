@@ -1,6 +1,12 @@
 import {WebChiakiConstants} from "./constants/WebChiakiConstants";
 import {SonyConsole} from "./models/Core";
-import {DiscoveryCallback, DiscoveryStartCallback, initDiscovery} from "./service/DiscoveryService";
+import {
+    DiscoveryCallback,
+    DiscoveryStartCallback,
+    getDiscoveryEnabled,
+    initDiscovery,
+    toggleDiscoveryEnabled
+} from "./service/DiscoveryService";
 import express, {Request, Response, Express} from 'express';
 import bodyParser from 'body-parser';
 import http from 'http';
@@ -41,6 +47,15 @@ io.on('connection', (socket: Socket) => {
 
   // Send a welcome message to the connected client
   socket.emit('discovered_hosts', combineHosts());
+  socket.emit('discovery_enabled', getDiscoveryEnabled());
+
+  socket.on('toggleDiscovery', () => {
+    toggleDiscoveryEnabled();
+    console.log("Discvoery is "+getDiscoveryEnabled());
+    discoveredHosts = [];
+    io.emit('discovered_hosts', combineHosts());
+    io.emit('discovery_enabled', getDiscoveryEnabled());
+  });
 
   // Handle disconnection
   socket.on('disconnect', () => {
