@@ -1,103 +1,47 @@
-import {WebChiakiConstants} from "./constants/WebChiakiConstants";
-import {SonyConsole} from "./models/Core";
-import {
-    DiscoveryCallback,
-    DiscoveryStartCallback,
-    getDiscoveryEnabled,
-    initDiscovery,
-    toggleDiscoveryEnabled
-} from "./service/DiscoveryService";
-import express, {Request, Response, Express} from 'express';
-import bodyParser from 'body-parser';
-import http from 'http';
-import {Server, Socket} from 'socket.io';
-import {getRegisteredHosts, register} from "./service/RegistrationService";
-import {RegistrationForm} from "./models/Registration";
-import {API_RESPONSE} from "./models/Api";
+import express, { type Express } from "express";
+import exphbs from "express-handlebars";
+import http from "http";
+import { Server, type Socket } from "socket.io";
+import router from "./routes/routes";
+import { DiscoverySocketRoute } from "./routes/DiscoverySocketRoute";
+import { RegisterSocketRoute } from "./routes/RegisterSocketRoute";
+import path from "path";
 
-const app : Express = express();
-app.use(bodyParser.json());
-const server : http.Server = http.createServer(app);
-const io : Server = new Server(server);
-const port : number = 9944;
+const app: Express = express();
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-expect-error
+app.engine("hbs", exphbs({
+	defaultLayout: "layout",
+	extname: "hbs",
+	layoutsDir: path.join(__dirname, "views/layouts"),
+	partialsDir: path.join(__dirname, "views"),
+}));
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "hbs");
 
-let discoveredHosts : SonyConsole[] = [];
-const registeredHosts : SonyConsole[] = getRegisteredHosts();
+const server: http.Server = http.createServer(app);
+const io: Server = new Server(server);
+const port: number = 9944;
+
+// Socket routes
+const discoverySockets: DiscoverySocketRoute = new DiscoverySocketRoute(io);
+const registerSockets: RegisterSocketRoute = new RegisterSocketRoute(io);
 
 // Serve your static files (if any)
-app.use(express.static('public'));
+app.use(express.static("public"));
+app.use("/", router);
 
-app.get('/', (req : Request, res : Response) => {
-  res.sendFile(__dirname + '/views/index.html');
-});
+io.on("connection", (socket: Socket) => {
+	console.log("A user connected");
+	discoverySockets.socketConnection(socket);
+	registerSockets.socketConnection(socket);
 
-app.get('/register', (req : Request, res : Response) => {
-  res.sendFile(__dirname + '/views/register.html');
-});
-
-app.post('/register', (req : Request, res : Response) => {
-  const form : RegistrationForm = req.body;
-  register(form);
-  const apiResponse : API_RESPONSE = { status : "OK" };
-  res.json(apiResponse)
-})
-
-io.on('connection', (socket: Socket) => {
-  console.log('A user connected');
-
-  // Send a welcome message to the connected client
-  socket.emit('discovered_hosts', combineHosts());
-  socket.emit('discovery_enabled', getDiscoveryEnabled());
-
-  socket.on('toggleDiscovery', () => {
-    toggleDiscoveryEnabled();
-    console.log("Discvoery is "+getDiscoveryEnabled());
-    discoveredHosts = [];
-    io.emit('discovered_hosts', combineHosts());
-    io.emit('discovery_enabled', getDiscoveryEnabled());
-  });
-
-  // Handle disconnection
-  socket.on('disconnect', () => {
-    console.log('User disconnected');
-  });
+	// Handle disconnection
+	socket.on("disconnect", () => {
+		console.log("User disconnected");
+	});
 });
 
 server.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+	console.log(`Server is running at http://localhost:${port}`);
 });
-
-function combineHosts() : SonyConsole[] {
-  const combinedHosts : SonyConsole[] = discoveredHosts;
-  //Add discovered hosts and check if they're registered
-  combinedHosts.forEach((discoveredHost : SonyConsole) => {
-    const registeredHost : SonyConsole | undefined = registeredHosts.find((h : SonyConsole) => h.hostId == discoveredHost.hostId);
-    if (registeredHost){
-      discoveredHost = {
-        ...registeredHost,
-        ...discoveredHost,
-        registered : true,
-        discovered : true
-      }
-    }
-  });
-  
-  //Add registered hosts as undiscovered
-  combinedHosts.concat(registeredHosts.filter((h : SonyConsole) => !combinedHosts.find((ch : SonyConsole) => ch.hostId==h.hostId)));
-  combinedHosts.sort((a : SonyConsole, b : SonyConsole) => a.hostId > b.hostId ? 1 : -1);
-  return combinedHosts;
-}
-
-const hostDiscoveredCallback: DiscoveryCallback = (sonyConsole : SonyConsole | null) => {
-    if (sonyConsole){
-        discoveredHosts.push(sonyConsole);
-    }
-    io.emit('discovered_hosts', combineHosts());
-};
-
-const discoveryStartingCallback : DiscoveryStartCallback = () => {
-  discoveredHosts = [];
-}
-
-initDiscovery(WebChiakiConstants.CHIAKI_DISCOVERY_PROTOCOL_VERSION_PS4, WebChiakiConstants.CHIAKI_DISCOVERY_PORT_PS4, hostDiscoveredCallback, discoveryStartingCallback);
-initDiscovery(WebChiakiConstants.CHIAKI_DISCOVERY_PROTOCOL_VERSION_PS5, WebChiakiConstants.CHIAKI_DISCOVERY_PORT_PS5, hostDiscoveredCallback, discoveryStartingCallback);

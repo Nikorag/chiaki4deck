@@ -1,23 +1,30 @@
-import {RegistrationAddressType} from "./Registration";
+/* eslint-disable @typescript-eslint/no-misused-new */
+import { type RegistrationAddressType } from "./Registration";
 
-export type Register = {
-    new () : Register
-    createPayload : (addressType : RegistrationAddressType, psnOnlineId : string, psnAccountId : string, pin : string) => Iterable<number>
-    createHeader : (addressType : RegistrationAddressType, size : number) => string
-    startSearch : (addressType : RegistrationAddressType, address : string) => ChiakiSearchResponse
-    connect : (addressType : RegistrationAddressType, address : string, psnOnlineId : string, psnAccountId : string, pin : string) => ChiakiRegisteredHost
+export interface Register {
+  new (): Register
+  createPayload: (addressType: RegistrationAddressType, psnOnlineId: string | undefined, psnAccountId: string, pin: string) => Iterable<number>
+  createHeader: (addressType: RegistrationAddressType, size: number) => string
+  startSearch: (addressType: RegistrationAddressType, address: string) => ChiakiSearchResponse
+  connect: (addressType: RegistrationAddressType, address: string, psnOnlineId: string | undefined, psnAccountId: string, pin: string) => ChiakiRegisteredHost
 }
 
-export type ChiakiSearchResponse = {
-    address : string,
-    port : number
+export interface Wakeup {
+  new (): Wakeup
+  wake: (regist_key: string, address: string, ps5: boolean) => boolean
 }
 
-export type ChiakiRegisteredHost = {
-    server_nickname : string,
-    regist_key : string
+export interface ChiakiSearchResponse {
+  address: string
+  port: number
 }
 
-export type Chiaki = {
-    Register : Register
+export interface ChiakiRegisteredHost {
+  server_nickname: string
+  regist_key: string
+}
+
+export interface Chiaki {
+  Register: Register
+  Wakeup: Wakeup
 }

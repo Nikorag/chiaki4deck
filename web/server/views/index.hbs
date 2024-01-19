@@ -1,0 +1,13 @@
+<div class="container console_container">
+  <div class="console_tile \{{host.status}}" ng-repeat="host in hosts">
+      <div class="console_details">
+        <p ng-click="registerConsole(host)">\{{host.hostName}}</p>
+        <p>Address: \{{host.address}}</p>
+        <p>ID: \{{host.hostId}}</p>
+        <p>(\{{host.registered ? 'registered' : 'unregistered'}})</p>
+        <p>\{{host.discovered ? 'discovered' : ''}}</p>
+      </div>
+      <div ng-include="consoleImage(host)" class=console_image></div>
+      <p class="console_state">State: \{{host.status}}</p>
+  </div>
+</div>

@@ -47,8 +47,6 @@ static chiaki_socket_t regist_request_connect(ChiakiRegist *regist, const struct
 
 Napi::Object Register::Init(Napi::Env env, Napi::Object exports) {
     Napi::Function func = DefineClass(env, "Register",{
-        InstanceMethod("createPayload", &Register::CreatePayload),
-        InstanceMethod("createHeader", &Register::CreateHeader),
     	InstanceMethod("startSearch", &Register::Search),
     	InstanceMethod("connect", &Register::Connect)
     });
@@ -62,46 +60,6 @@ Napi::Object Register::Init(Napi::Env env, Napi::Object exports) {
 
 Register::Register(const Napi::CallbackInfo& info) : Napi::ObjectWrap<Register>(info) {
 
-}
-
-Napi::Value Register::CreatePayload(const Napi::CallbackInfo& info) {
-    ChiakiRegistInfo registInfo = {};
-    int target = info[0].As<Napi::Number>();
-    registInfo.target = static_cast<ChiakiTarget>(target);
-    QString psn_online_id = QString::fromStdString(info[1].As<Napi::String>());
-	if (psn_online_id != "") {
-		registInfo.psn_online_id = psn_online_id.trimmed().toUtf8();
-	}
-    QString psn_account_id = QString::fromStdString(info[2].As<Napi::String>());
-    QString account_id_b64 = psn_account_id.trimmed();
-    QByteArray account_id = QByteArray::fromBase64(account_id_b64.toUtf8());
-    registInfo.psn_online_id = nullptr;
-    memcpy(registInfo.psn_account_id, account_id.constData(), 8);
-    QString pin = QString::fromStdString(info[3].As<Napi::String>());
-    registInfo.pin = (uint32_t)pin.toULong();
-
-    ChiakiRPCrypt crypt;
-    uint8_t ambassador[CHIAKI_RPCRYPT_KEY_SIZE];
-    ChiakiErrorCode err = chiaki_random_bytes_crypt(ambassador, sizeof(ambassador));
-
-    uint8_t payload[0x400];
-    size_t payload_size = sizeof(payload);
-    chiaki_regist_request_payload_format(registInfo.target, ambassador, payload, &payload_size, &crypt, registInfo.psn_online_id, registInfo.psn_account_id, registInfo.pin);
-    return Napi::ArrayBuffer::New(info.Env(), payload, payload_size);
-}
-
-Napi::Value Register::CreateHeader(const Napi::CallbackInfo& info) {
-    ChiakiRegistInfo registInfo = {};
-    int target = info[0].As<Napi::Number>();
-    registInfo.target = static_cast<ChiakiTarget>(target);
-
-    int payload_size_in = info[1].As<Napi::Number>();
-    size_t payload_size = static_cast<size_t>(payload_size_in);
-
-
-    char request_header[0x100];
-    int request_header_size = request_header_format(request_header, sizeof(request_header), payload_size, registInfo.target);
-    return Napi::String::From(info.Env(), request_header);
 }
 
 Napi::Value Register::Search(const Napi::CallbackInfo& info) {
@@ -180,16 +138,7 @@ Napi::Value Register::Connect(const Napi::CallbackInfo& info) {
 	chiaki_socket_t sock = regist_request_connect(&regist, reinterpret_cast<const sockaddr*>(&serverAddress), addr_size);
 	printf("Got Socket, sending header %s\n", request_header);
 	send(sock, request_header, request_header_size, 0);
-
-	printf("[ ");
-	for (size_t i = 0; i < payload_size; ++i) {
-		printf("%u", payload[i]);  // Assuming you want to print decimal values
-		if (i < payload_size - 1) {
-			printf(", ");
-		}
-	}
-	printf(" ]\n");
-
+	//Do we need a pause here?
 	send(sock, payload, payload_size, 0);
 
 	chiaki_stop_pipe_init(&regist.stop_pipe);
@@ -199,7 +148,7 @@ Napi::Value Register::Connect(const Napi::CallbackInfo& info) {
 
 	Napi::Object responseObject = Napi::Object::New(info.Env());
 	responseObject.Set("server_nickname", registered_host.server_nickname);
-	responseObject.Set("regist_key", strFromCharArray(registered_host.rp_regist_key));
+	responseObject.Set("regist_key", registered_host.rp_regist_key);
 
 	return responseObject;
 }
@@ -385,7 +334,7 @@ static ChiakiErrorCode set_port(struct sockaddr *sa, uint16_t port)
 	return CHIAKI_ERR_SUCCESS;
 }
 
-static inline const char *sockaddr_str(struct sockaddr *addr, char *addr_buf, size_t addr_buf_size)
+static const char *sockaddr_str(struct sockaddr *addr, char *addr_buf, size_t addr_buf_size)
 {
 	void *addr_src;
 	switch(addr->sa_family)

@@ -1,24 +1,24 @@
-import { Socket } from 'dgram';
+import { type Socket } from "dgram";
 
-export type Discovery = {
-    socket? : Socket;
-    localAddr: LocalAddr;
+export interface Discovery {
+  socket?: Socket
+  localAddr: LocalAddr
 }
 
-export type LocalAddr = {
-    family : string;
-    port : number;
-    address : string;
+export interface LocalAddr {
+  family: string
+  port: number
+  address: string
 }
 
 export enum DiscoverCommand {
-    SEARCH,
-    WAKEUP
+  SEARCH,
+  WAKEUP
 }
 
-export type DiscoverPacket = {
-    cmd : DiscoverCommand;
-    protocol_version : string;
-    user_credential? : string;
+export interface DiscoverPacket {
+  cmd: DiscoverCommand
+  protocol_version: string
+  user_credential?: string
 
 }
