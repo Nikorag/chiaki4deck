@@ -24,6 +24,10 @@ export function getRegisteredHosts (): SonyConsole[] {
 	return registeredHosts;
 }
 
+export function getRegisteredHostById (hostId : string) : SonyConsole | undefined {
+	return getRegisteredHosts().find((h : SonyConsole) => h.hostId == hostId);
+}
+
 export function register (form: RegistrationForm): SonyConsole {
 	const register: Register = new chiaki.Register();
 	const searchResponse: ChiakiSearchResponse = register.startSearch(form.addressType, form.inputAddress);
@@ -32,7 +36,8 @@ export function register (form: RegistrationForm): SonyConsole {
 		hostId: form.hostId,
 		status: ConsoleStatus.UNKNOWN,
 		hostName: registered_host.server_nickname,
-		registKey: registered_host.regist_key
+		registKey: registered_host.regist_key,
+		morning: registered_host.morning
 	};
 	insert("registered_hosts", response);
 	return response;

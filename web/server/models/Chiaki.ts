@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-misused-new */
 import { type RegistrationAddressType } from "./Registration";
+import {SonyConsole} from "./Core";
 
 export interface Register {
   new (): Register
@@ -14,6 +15,10 @@ export interface Wakeup {
   wake: (regist_key: string, address: string, ps5: boolean) => boolean
 }
 
+export interface StreamSession {
+  new (console : SonyConsole) : StreamSession
+}
+
 export interface ChiakiSearchResponse {
   address: string
   port: number
@@ -21,10 +26,12 @@ export interface ChiakiSearchResponse {
 
 export interface ChiakiRegisteredHost {
   server_nickname: string
-  regist_key: string
+  regist_key: string,
+  morning : string
 }
 
 export interface Chiaki {
-  Register: Register
-  Wakeup: Wakeup
+  Register : Register
+  Wakeup : Wakeup
+  StreamSession : StreamSession
 }

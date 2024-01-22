@@ -8,6 +8,8 @@ import { RegisterSocketRoute } from "./routes/RegisterSocketRoute";
 import path from "path";
 
 const app: Express = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
 app.engine("hbs", exphbs({

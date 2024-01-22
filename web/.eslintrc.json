@@ -15,7 +15,7 @@
     "plugins": [
         "@typescript-eslint"
     ],
-    "ignorePatterns": ["build/**/*", "public/**/*", "Gruntfile.js", "dist/**/*"],
+    "ignorePatterns": ["server/_ui/**/*.js", "build/**/*", "public/**/*", "Gruntfile.js", "dist/**/*"],
     "rules": {
         "@typescript-eslint/typedef": [
             "error",
@@ -42,21 +42,21 @@
         ]
     },
     "overrides": [
-        {
-            "files": ["server/_ui/**/*.js"],
-            "env": {
-                "browser": true,
-                "node": false
-            },
-            "extends": [
-                "eslint:recommended"
-            ],
-            "parserOptions": {
-                "ecmaVersion": "latest"
-            },
-            "rules": {
-                "@typescript-eslint/typedef": "off"
-            }
-        }
+//        {
+//            "files": ["server/_ui/**/*.js"],
+//            "env": {
+//                "browser": true,
+//                "node": false
+//            },
+//            "extends": [
+//                "eslint:recommended"
+//            ],
+//            "parserOptions": {
+//                "ecmaVersion": "latest"
+//            },
+//            "rules": {
+//                "@typescript-eslint/typedef": "off"
+//            }
+//        }
     ]
 }

@@ -26,32 +26,24 @@ function AppCtrl($scope, socket, $modal) {
 	};
 
 	$scope.consoleImage = function(host){
-		if (host.hostType == 0) {
+		if (host.hostType === 0) {
 			return "images/console.svg";
 		} else {
 			return "images/console2.svg";
 		}
 	};
-    
-	$scope.registerConsole = function(host) {
-		if (host.registered){
-			socket.emit("wake", host);
-		} else {
-			console.log("Clicked");
-			var modalInstance = $modal.open({
-				animcation: true,
-				templateUrl: "/register",
-				controller: "RegisterCtrl",
-				resolve: {
-					host: function() {
-						return host;
-					}
-				}
-			});
 
-			modalInstance.result.then(function (form) {
-				socket.emit("register", form);
-			});
+	$scope.triggerConsole = function(host) {
+		//Check if we're registered
+		if (host.chiakiStatus.registered){
+			if (host.status === "Standby"){
+			 	wakeup(host, $modal, socket);
+			} else if (host.status === "Ready") {
+			 	//Start the stream
+			 	startStream(host);
+			 }
+		} else {
+			registerConsole(host, $modal, socket);
 		}
 	};
 }
@@ -79,6 +71,18 @@ function RegisterCtrl($scope, $modalInstance, host) {
 	};
 }
 
+function StandbyCtrl($scope, $modalInstance, host) {
+	$scope.host = host;
+
+	$scope.ok = function () {
+		$modalInstance.close();
+	}
+
+	$scope.cancel = function () {
+		$modalInstance.dismiss("cancel");
+	};
+}
+
 function mapStatus(status){
 	if (status === 620) { return "Standby"; }
 	if (status === 200) { return "Ready"; }
@@ -97,3 +101,4 @@ function mapAddressType(type) {
 app.controller("AppCtrl", ["$scope", "socket", "$modal", AppCtrl]);
 // eslint-disable-next-line no-undef
 app.controller("RegisterCtrl", ["$scope", "$modalInstance", "host", RegisterCtrl]);
+app.controller("StandbyCtrl", ["$scope", "$modalInstance", "host", StandbyCtrl]);

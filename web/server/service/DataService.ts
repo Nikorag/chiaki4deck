@@ -14,7 +14,8 @@ export function openDb (): Database {
     'registKey' varchar, \
     'registered' varchar, \
     'discovered' varchar, \
-    'systemVersion' varchar);";
+    'systemVersion' varchar, \
+	'morning' varchar);";
 	db.exec(createRegisteredHostsTable);
 
 	// Some initialization

@@ -9,6 +9,12 @@ export enum ConsoleType {
   PS5
 }
 
+export interface ChiakiStatus {
+  registered?: boolean
+  discovered?: boolean
+  lastSeen?: Date
+}
+
 export interface SonyConsole {
   address?: string
   status: ConsoleStatus
@@ -18,7 +24,7 @@ export interface SonyConsole {
   hostRequestPort?: number
   deviceDiscoveryProtocolVersion?: string
   systemVersion?: string
-  registered?: boolean
-  discovered?: boolean
   registKey?: string
+  morning?: string
+  chiakiStatus?: ChiakiStatus
 }

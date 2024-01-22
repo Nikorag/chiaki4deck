@@ -138,8 +138,10 @@ function parseSonyConsoleString (input: string, remoteInfo: RemoteInfo): SonyCon
 			hostRequestPort: consoleInfo.hostRequestPort,
 			deviceDiscoveryProtocolVersion: consoleInfo.deviceDiscoveryProtocolVersion,
 			systemVersion: consoleInfo.systemVersion,
-			registered: false,
-			discovered: true
+			chiakiStatus: {
+				discovered: true,
+				lastSeen: new Date()
+			}
 		};
 	} else {
 		return null;

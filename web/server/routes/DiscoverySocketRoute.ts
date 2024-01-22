@@ -5,24 +5,34 @@ import { type DiscoveryCallback, type DiscoveryStartCallback, getDiscoveryEnable
 import { WebChiakiConstants } from "../constants/WebChiakiConstants";
 import { AbstractSocketRoute } from "./AbstractSocketRoute";
 
+let discoveredHosts: SonyConsole[] = [];
+
 export class DiscoverySocketRoute extends AbstractSocketRoute {
-	private discoveredHosts: SonyConsole[];
 	private readonly hostDiscoveredCallback: DiscoveryCallback;
 	private readonly discoveryStartingCallback: DiscoveryStartCallback;
 
 	constructor (io: Server) {
 		super(io);
-		this.discoveredHosts = [];
 
 		this.hostDiscoveredCallback = (sonyConsole: SonyConsole | null) => {
 			if (sonyConsole) {
-				this.discoveredHosts.push(sonyConsole);
+				const existingIndex : number = discoveredHosts.findIndex((host : SonyConsole) => host.hostId === sonyConsole.hostId);
+				if (existingIndex > -1){
+					discoveredHosts[existingIndex] = sonyConsole;
+				} else {
+					discoveredHosts.push(sonyConsole);
+				}
 			}
 			io.emit("discovered_hosts", this.getHosts());
 		};
 
 		this.discoveryStartingCallback = () => {
-			this.discoveredHosts = [];
+			//Remove any consoles not seen for 6 seconds
+			discoveredHosts = discoveredHosts.filter((host : SonyConsole) => {
+				const sixSecondsAgo : Date = new Date();
+				sixSecondsAgo.setSeconds(sixSecondsAgo.getSeconds() - 6);
+				return host.chiakiStatus?.lastSeen && host.chiakiStatus.lastSeen > sixSecondsAgo;
+			});
 		};
 
 		initDiscovery(WebChiakiConstants.CHIAKI_DISCOVERY_PROTOCOL_VERSION_PS4, WebChiakiConstants.CHIAKI_DISCOVERY_PORT_PS4, this.hostDiscoveredCallback, this.discoveryStartingCallback);
@@ -36,7 +46,7 @@ export class DiscoverySocketRoute extends AbstractSocketRoute {
 		socket.on("toggleDiscovery", () => {
 			toggleDiscoveryEnabled();
 			console.log("Discvoery is " + getDiscoveryEnabled());
-			this.discoveredHosts = [];
+			discoveredHosts = [];
 			this.io.emit("discovered_hosts", this.getHosts());
 			this.io.emit("discovery_enabled", getDiscoveryEnabled());
 		});
@@ -48,16 +58,17 @@ export class DiscoverySocketRoute extends AbstractSocketRoute {
 
 	getHosts (): SonyConsole[] {
 		const registeredHosts: SonyConsole[] = getRegisteredHosts();
-		const combinedHosts: SonyConsole[] = this.discoveredHosts.map((discoveredHost: SonyConsole): SonyConsole => {
+		const combinedHosts: SonyConsole[] = discoveredHosts.map((discoveredHost: SonyConsole): SonyConsole => {
 			const registeredHost: SonyConsole | undefined = registeredHosts.find((h: SonyConsole) => h.hostId == discoveredHost.hostId);
 			if (registeredHost) {
-				const combined: SonyConsole = {
+				return {
 					...registeredHost,
 					...discoveredHost,
-					discovered: true
+					chiakiStatus : {
+						...discoveredHost.chiakiStatus,
+						registered : true
+					}
 				};
-				combined.registered = true;
-				return combined;
 			} else {
 				return discoveredHost;
 			}
@@ -67,4 +78,8 @@ export class DiscoverySocketRoute extends AbstractSocketRoute {
 		combinedHosts.sort((a: SonyConsole, b: SonyConsole) => a.hostId > b.hostId ? 1 : -1);
 		return combinedHosts;
 	}
+}
+
+export function getDiscoveredHostById (hostId : string) : SonyConsole | undefined {
+	return discoveredHosts.find((h : SonyConsole) => h.hostId == hostId);
 }
