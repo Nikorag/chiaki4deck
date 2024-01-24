@@ -30,7 +30,7 @@ router.post("/streamWindow", (req : Request, res : Response) => {
 
 router.get("/stream", async (req : Request, res : Response) => {
 	const host : unknown = req.query.hostId;
-	const registered : SonyConsole | undefined = getRegisteredHostById(host as string);
+	const registered : SonyConsole | undefined = await getRegisteredHostById(host as string);
 
 	if (!registered) {
 		res.redirect("/");

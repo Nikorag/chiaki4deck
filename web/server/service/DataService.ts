@@ -1,38 +1,44 @@
-import DatabaseConstructor, { type Database, type Statement } from "better-sqlite3";
+/* eslint-disable @typescript-eslint/typedef */
+/* eslint-disable no-prototype-builtins */
+import storage from "node-persist";
+import { sleep } from "../utils/WebChiakiUtils";
 
-export function openDb (): Database {
-	const db: Database = new DatabaseConstructor("data/web-chiaki.db");
+let storageReady : boolean = false;
 
-	const createRegisteredHostsTable: string = "CREATE TABLE IF NOT EXISTS registered_hosts( \
-    'address' varchar, \
-    'status' integer, \
-    'hostId' varchar PRIMARY KEY, \
-    'hostType' integer, \
-    'hostName' varchar, \
-    'hostRequestPort' integer, \
-    'deviceDiscoveryProtocolVersion' varchar, \
-    'registKey' varchar, \
-    'registered' varchar, \
-    'discovered' varchar, \
-    'systemVersion' varchar, \
-	'morning' varchar);";
-	db.exec(createRegisteredHostsTable);
+storage.init({logging: false, dir: "data"}).then(() => {
+	console.log("Storage Ready");
+	storageReady = true;
+});
 
-	// Some initialization
-	return db;
+
+
+export async function getAll<T>(tableName: string) : Promise<Array<T>> {
+	while (!storageReady){
+		await sleep(50);
+	}
+	let storedArray : Array<T> = await storage.getItem(tableName);
+	storedArray = storedArray ? storedArray : [];
+
+	return storedArray;
 }
 
-export function insert (tableName: string, data: object): void {
-	const db: Database = openDb();
-	const columns: string[] = Object.keys(data);
+export async function insert<T>(tableName: string, data: T, key : string): Promise<void> {
+	while (!storageReady){
+		await sleep(50);
+	}
 
-	const placeholders: string = columns.map((c: string) => `:${c}`).join(", ");
-	const columnsList: string = columns.join(", ");
+	let storedArray : Array<T> = await storage.getItem(tableName);
+	storedArray = storedArray ? storedArray : [];
 
-	const insertStatement: string = `INSERT INTO ${tableName} (${columnsList}) VALUES (${placeholders})`;
-	console.log(insertStatement);
-	const insertCommand: Statement = db.prepare(insertStatement);
-	insertCommand.run(data);
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-expect-error
+	const existingIndex : number = storedArray.findIndex((i : T) => i[key] === data[key]);
 
-	db.close();
+	if (existingIndex > -1){
+		storedArray[existingIndex] = data;
+	} else {
+		storedArray.push(data);
+	}
+
+	await storage.setItem(tableName, storedArray);
 }

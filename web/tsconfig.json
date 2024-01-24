@@ -6,9 +6,10 @@
     "rootDir": "./server",
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "strictNullChecks" : false
   },
   "exclude": [
-    "build"
+    "build", "client", "dist"
   ]
 }

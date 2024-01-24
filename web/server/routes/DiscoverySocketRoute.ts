@@ -4,6 +4,7 @@ import { getRegisteredHosts } from "../service/RegistrationService";
 import { type DiscoveryCallback, type DiscoveryStartCallback, getDiscoveryEnabled, initDiscovery, toggleDiscoveryEnabled, wakeup } from "../service/DiscoveryService";
 import { WebChiakiConstants } from "../constants/WebChiakiConstants";
 import { AbstractSocketRoute } from "./AbstractSocketRoute";
+import { SocketConstants } from "../constants/SocketConstants";
 
 let discoveredHosts: SonyConsole[] = [];
 
@@ -23,7 +24,9 @@ export class DiscoverySocketRoute extends AbstractSocketRoute {
 					discoveredHosts.push(sonyConsole);
 				}
 			}
-			io.emit("discovered_hosts", this.getHosts());
+			this.getHosts().then((hosts : SonyConsole[]) =>{
+				io.emit(SocketConstants.DISCOVERED_HOSTS_SUBJECT, hosts);
+			});
 		};
 
 		this.discoveryStartingCallback = () => {
@@ -40,33 +43,37 @@ export class DiscoverySocketRoute extends AbstractSocketRoute {
 	}
 
 	socketConnection (socket: Socket): void {
-		socket.emit("discovered_hosts", this.getHosts());
-		socket.emit("discovery_enabled", getDiscoveryEnabled());
+		this.getHosts().then((hosts : SonyConsole[]) =>{
+			socket.emit(SocketConstants.DISCOVERED_HOSTS_SUBJECT, hosts);
+		});
+		socket.emit(SocketConstants.DISCOVERY_STATUS_SUBJECT, getDiscoveryEnabled());
 
-		socket.on("toggleDiscovery", () => {
+		socket.on(SocketConstants.TOGGLE_DISCOVERY_SUBJECT, () => {
 			toggleDiscoveryEnabled();
 			console.log("Discvoery is " + getDiscoveryEnabled());
 			discoveredHosts = [];
-			this.io.emit("discovered_hosts", this.getHosts());
-			this.io.emit("discovery_enabled", getDiscoveryEnabled());
+			this.getHosts().then((hosts : SonyConsole[]) =>{
+				this.io.emit(SocketConstants.DISCOVERED_HOSTS_SUBJECT, hosts);
+			});
+			this.io.emit(SocketConstants.DISCOVERY_STATUS_SUBJECT, getDiscoveryEnabled());
 		});
 
-		socket.on("wake", (data: SonyConsole) => {
+		socket.on(SocketConstants.WAKE_SUBJECT, (data: SonyConsole) => {
 			wakeup(data);
 		});
 	}
 
-	getHosts (): SonyConsole[] {
-		const registeredHosts: SonyConsole[] = getRegisteredHosts();
+	async getHosts(): Promise<SonyConsole[]> {
+		const registeredHosts: SonyConsole[] = await getRegisteredHosts();
 		const combinedHosts: SonyConsole[] = discoveredHosts.map((discoveredHost: SonyConsole): SonyConsole => {
 			const registeredHost: SonyConsole | undefined = registeredHosts.find((h: SonyConsole) => h.hostId == discoveredHost.hostId);
 			if (registeredHost) {
 				return {
 					...registeredHost,
 					...discoveredHost,
-					chiakiStatus : {
+					chiakiStatus: {
 						...discoveredHost.chiakiStatus,
-						registered : true
+						registered: true
 					}
 				};
 			} else {

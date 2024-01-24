@@ -18,3 +18,9 @@ export function checkConditionWithTimeout(condition: () => boolean, tick : numbe
 			}, timeoutMillis);
 	});
 }
+
+export function sleep(ms : number) {
+	return new Promise((resolve) => {
+		setTimeout(resolve, ms);
+	});
+}

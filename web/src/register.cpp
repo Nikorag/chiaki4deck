@@ -150,11 +150,11 @@ Napi::Value Register::Connect(const Napi::CallbackInfo& info) {
 	responseObject.Set("server_nickname", registered_host.server_nickname);
 	responseObject.Set("regist_key", registered_host.rp_regist_key);
 
+	auto morning = QByteArray((const char *)registered_host.rp_key, sizeof(registered_host.rp_key));
 
-	size_t morningSize = sizeof(registered_host.rp_key) / sizeof(registered_host.rp_key[0]);
-	std::string morning(reinterpret_cast<char*>(registered_host.rp_key), morningSize);
+	responseObject.Set("morning", morning.toHex());
 
-	responseObject.Set("morning", morning);
+	printf("Providing Hex String: %s\n", morning.toStdString().c_str());
 
 	return responseObject;
 }
