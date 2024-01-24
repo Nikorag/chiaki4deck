@@ -13,8 +13,7 @@
     "less": "^4.2.0",
     "less-loader": "^12.1.0",
     "socket.io-client": "^4.7.4",
-    "vue": "^3.2.13",
-    "vue-final-modal": "^4.5.3"
+    "vue": "^3.2.13"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
