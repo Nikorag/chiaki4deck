@@ -37,8 +37,9 @@ chiaki.conf
 site/
 
 #Web Chiaki
-web/node_modules
+node_modules
 web/build
+web/client/build
 web/dist
 web/data
 web/public/js/app.js
