@@ -8,8 +8,7 @@
     "start:all": "concurrently \"npm run start\" \"cd client && npm run serve\"",
     "compile:all": "concurrently \"npm run compile\" \"cd client && npm run build\"",
     "start": "ts-node server/index.ts",
-    "compile": "tsc && grunt && cmake-js --out=build -d ../ --CDCHIAKI_ENABLE_STEAMDECK_NATIVE=OFF --CDCHIAKI_ENABLE_CLI=OFF --CDCHIAKI_ENABLE_GUI=OFF compile",
-    "build": "tsc && grunt && grunt watch-changes",
+    "compile": "tsc && cmake-js --out=build -d ../ --CDCHIAKI_ENABLE_STEAMDECK_NATIVE=OFF --CDCHIAKI_ENABLE_CLI=OFF --CDCHIAKI_ENABLE_GUI=OFF compile",
     "lint": "eslint ."
   },
   "author": "",
@@ -20,10 +19,6 @@
     "@typescript-eslint/parser": "^6.19.0",
     "concurrently": "^8.2.2",
     "eslint": "^8.56.0",
-    "grunt": "^1.6.1",
-    "grunt-contrib-cssmin": "^5.0.0",
-    "grunt-contrib-less": "^3.0.0",
-    "grunt-contrib-watch": "^1.1.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   },
@@ -35,9 +30,6 @@
     "bindings": "^1.5.0",
     "cmake-js": "^7.3.0",
     "express": "^4.18.2",
-    "grunt-contrib-clean": "^2.0.1",
-    "grunt-contrib-concat": "^2.1.0",
-    "grunt-contrib-uglify": "^5.2.2",
     "node-persist": "^4.0.1",
     "npm": "^10.2.5",
     "socket.io": "^4.7.3"
