@@ -7,7 +7,7 @@
     "install:all": "concurrently \"npm install\" \"cd client && npm install\"",
     "start:all": "concurrently \"npm run start\" \"cd client && npm run serve\"",
     "compile:all": "concurrently \"npm run compile\" \"cd client && npm run build\"",
-    "start": "ts-node server/index.ts",
+    "start": "NODE_OPTIONS=--force-node-api-uncaught-exceptions-policy=true ts-node server/index.ts",
     "compile": "tsc && cmake-js --out=build -d ../ --CDCHIAKI_ENABLE_STEAMDECK_NATIVE=OFF --CDCHIAKI_ENABLE_CLI=OFF --CDCHIAKI_ENABLE_GUI=OFF compile",
     "lint": "eslint ."
   },
@@ -33,6 +33,7 @@
     "node-addon-api": "^7.1.0",
     "node-persist": "^4.0.1",
     "npm": "^10.2.5",
+    "sharp": "^0.33.2",
     "socket.io": "^4.7.3"
   }
 }

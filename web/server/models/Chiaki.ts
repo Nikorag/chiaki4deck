@@ -15,8 +15,18 @@ export interface Wakeup {
   wake: (regist_key: string, address: string, ps5: boolean) => boolean
 }
 
+export type FFMpegFrameCallback = () => void
+
 export interface StreamSession {
-  new (console : SonyConsole) : StreamSession
+  new (console : SonyConsole, ffmpegFrameCb : FFMpegFrameCallback) : StreamSession
+  getFrame: () => StreamFrame,
+  stopSession: () => void
+}
+
+export interface StreamFrame {
+  width : number,
+  height: number,
+  frameData : ArrayBuffer
 }
 
 export interface ChiakiSearchResponse {

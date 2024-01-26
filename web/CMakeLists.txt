@@ -30,8 +30,9 @@ find_package(Qt6 REQUIRED COMPONENTS Core Concurrent)
 target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB})
 target_link_libraries(${PROJECT_NAME} chiaki-lib)
 target_link_libraries(${PROJECT_NAME} Qt::Core Qt::Concurrent)
+target_link_libraries(${PROJECT_NAME} avcodec avformat avutil swscale)
 target_include_directories(${PROJECT_NAME} PRIVATE "node_modules/node-addon-api")
 target_include_directories(${PROJECT_NAME} PRIVATE "include")
 
 # Define NAPI_VERSION
-add_definitions(-DNAPI_VERSION=3)
+add_definitions(-DNAPI_VERSION=4)

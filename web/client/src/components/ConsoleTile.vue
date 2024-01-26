@@ -30,7 +30,6 @@
 </template>
 
 <script>
-import io from 'socket.io-client';
 import PS4Vector from './PS4Vector.vue';
 import PS5Vector from './PS5Vector.vue';
 import RegistrationForm from './RegistrationForm.vue';
@@ -43,11 +42,14 @@ export default {
       PS4Vector,
       PS5Vector
     },
+    props: {
+        hosts: Array,
+        socket: Object
+    },
     data() {
         return {
-            hosts: [],
             selectedHostId: null,
-            socket: io('http://localhost:9944')
+            frameData: null
         };
     },
     methods: {
@@ -84,14 +86,7 @@ export default {
             })
           }
         }
-    },
-    mounted() {
-
-        // Connect to WebSocket and listen for 'discovered_hosts' message
-        this.socket.on('discovered_hosts', (data) => {
-            this.hosts = data;
-        });
-    },
+    }
 };
 </script>
 
